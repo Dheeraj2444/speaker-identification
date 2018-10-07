@@ -52,58 +52,61 @@
 \begin{quote}
 % such BS, much wow, amaze!!
 % srsly though, need some actual backing for this
-Speaker identification and verification has received a lot of attention in the recent years. Recognizing individual speakers from voice samples that are pre-recorded can have many applications in fields of security such as for personal assistant applications such as Amazon Alexa, and multi factor authentication. Particularly for home assistant applications, it may be beneficial to identify each individual of the house correctly, and alert the users if there is an intrusion attempt. In this project we aim to use machine learning and deep learning models for this task and aim to develop an application that can demonstrate a use case.
+Speaker identification and verification has received a lot of attention in the recent years with the rise in heavy usage of home and personal assistant systems such as HomePod, Amazon Alexa, Google Home, etc. Recognizing individual speakers from voice has benefits by providing personalized assistance to users as well as other applications related to security and privacy such as authentication and intrusion detection. In this project we aim to develop an application using machine learning and deep learning models for Speaker Identification and demonstrate its use cases.
 
 \end{quote}
 \end{abstract}
 
 % better keywords needed
-\textbf{Keywords :} Signal Processing, Speaker Identification, Machine Learning, Deep Learning
+\textbf{Keywords :} Signal Processing, Speaker Identification, Machine Learning, Deep Learning, Home Assistant Systems
 
 
 \section{Introduction}
-Speaker identification aims to recognize the identity of individual speakers from an input audio. The task of verification aims to check whether an individual is who they claim to be based on the speech of the user. The task can be performed in two ways: text dependent and text independent.  In text dependent cases, the input utterance is always a keyword or keyphrase selected by the user, while text independent speaker identification aims to do the same task for any utterance. \cite{cassidy-speech}
-
-The task of speaker identification and verification can be broken down into three sub-tasks: Feature extraction, speaker enrollment, speaker verification.
-Feature extraction aims to extract features from the audio inputs that can help in identifying users easily. Some commonly used feature extraction  methods include Mel Frequency Cepstral Coefficients (MFCC), Short Time Fourier Transform (STFT), Perceptual Linear Prediction (PLP), and Convolutional Neural Network (CNN) features.
-Speaker enrollment aims to learn speaker specific models form the features extracted in the feature extraction phase, and the final identification task tries to find the closest matching model for an input signal \cite{sv-cnn}. 
+Speaker identification aims to recognize the identity of individual speakers from an input audio. The task of verification aims to check whether an individual is who they claim to be based on the speech of the user. The task can be performed in two ways: text dependent and text independent.  In text dependent cases, the input utterance is always a keyword or key-phrase which has been pre-selected, while text independent speaker identification aims to do the same task for any utterance. \cite{cassidy-speech}
+ 
 %\section{Background and Related Work}
 %Optional here
 
 \section{Dataset}
 %cite the dataset and paper about it
-Most datasets that we have seen have been developed in controlled environments (for eg TIMIT dataset), even though they contain recordings in different sessions. Since many of these datasets were human labeled and cleaned manually they are typically smaller in size. Recently a team at Oxford released their VoxCeleb dataset which contains more than 1M labeled audio clips for around 7000 different celebrities from Youtube. The data is publicly available for research in the field \cite{voxCeleb}.
+Most datasets that we have seen have been developed in controlled environments (for eg TIMIT dataset), even though they contain recordings in different sessions. Since many of these datasets were human labeled and cleaned manually they are typically smaller in size. Recently a team at Oxford released their VoxCeleb dataset which contains more than 1M labeled audio clips for around 7000 different celebrities from Youtube. The data is publicly available for research \cite{voxCeleb}.
 
 %The dataset contains various \emph{.wav} files that are a few seconds long and contain voice of a speaker in real life environments. The data contains various clips for each speaker form different Youtube videos, in different environments, with a lot of variations for each speaker.
 
-For the intrusion detection task, we plan to reduce the 7000 class problem down to a 6 class problem, where 5 classes are for legitimate users, and the 6th class belongs to anyone who is not authorized (intruder). We did not choose a binary setting as we want to allow room for \emph{special privileges} of each user in our application.
+%For the intrusion detection task, we plan to reduce the 7000 class problem down to a suitable size, say, 6 class problem, where 5 classes are for legitimate users, and the 6th class belongs to anyone who is not authorized (intruder). We did not choose a binary setting as we want to allow room for \emph{special privileges} of each user in our application.
+
+\section{Goals}
+
+For the speaker verification task, we plan to pick a few users, for example, 5 users which will be enrolled and authorized in the system. We plan to build models to identify as well as verify among these legitimate users. For any other users who tries to gain access, we aim to tag them as intruders.
+
+
+We have identified the following goals from easiest to hardest that we want to accomplish by the end of this project.. These are tentative goals and are subject to change as we go along with the project.
+
+\begin{itemize}
+	\item Firstly, we plan to benchmark and compare existing models for identification and verification a few selected users and further try to improve their performance for our task.
+	\item Then, we aim to improve on this model so that we can enroll new legitimate users while minimizing total utterance requirements and enrollment time.
+	\item Finally, we want to develop a reproducible application to demonstrate the use cases of our project in a real world scenario.
+	
+\end{itemize}
+
 \section{Techniques}
+
+The task of speaker identification and verification can be broken down into three sub-tasks: \textit{Feature extraction, speaker enrollment and speaker verification}.
+Feature extraction aims to extract features from the audio inputs that can help in identifying users easily.
+Speaker enrollment aims to learn speaker specific models form the features extracted in the feature extraction phase, and the final verification task compares the closest matching speaker model for an input signal \cite{sv-cnn}.
+
 For the purpose of the project we have identified a few different techniques that we would like to experiment with below:
 \begin{enumerate}
-	\item Speaker identification using traditional methods (GMM UBM, RBM, Kalman filtering, MFCC features and SVM etc)
+	\item Speaker identification using traditional feature extraction methods (GMM UBM, RBM, Kalman filtering, MFCC features  and other models) and traditional classification approaches.
 	
-	\item Speaker identification using deep learning methods (LSTMs, CNNs, multi-channel neural networks).
-	
-	\item Use of Bayesian Methods to understand uncertainty for speaker Identification.
-	
-	\item Attempt to use attention based deep learning models .
-	
-	\item Train speaker identification in the intrusion detection scenario with few utterances from legitimate speakers.
-	
-	\item Develop an application based on the trained model
-	
-\end{enumerate}
-\section{Goals}
-We have identified the following goals that we want to accomplish by the end of this project. These are tentative goals and are subject to change as we go along with the project.
-\begin{enumerate}
-	\item Understanding traditional feature extraction methods in signal processing, specifically for the task of speaker identification.
-	
-	\item Using Machine learning and deep learning techniques to train models that can identify individual speakers in real time.
+	\item Using deep learning methods  (LSTMs, CNNs, Siamese net,  multi-channel neural networks) for speaker identification and verification.
 	
 	\item Using Bayesian approach to understand the uncertainty in the predictions made by the model, to better understand the mistakes.
 	
-	\item Develop an application based on the models developed that can be easily installed and used easily for demonstrated.
+	\item Improving the model for fast enrollment with a few utterances.
+
 \end{enumerate}
+
 %\section{Approach}
 
 %\section{Results}
