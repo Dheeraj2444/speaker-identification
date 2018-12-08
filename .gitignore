@@ -1,0 +1,10 @@
+main.pdf
+*.cut
+*.aux
+*.bbl
+*.blg
+*.fls
+*.out
+*.synctex.*
+*.bib.bak
+*.log

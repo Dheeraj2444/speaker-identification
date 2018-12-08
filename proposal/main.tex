@@ -1,0 +1,136 @@
+%File: formatting-instruction.tex
+\documentclass[letterpaper]{article}
+\usepackage{aaai}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage{graphicx}
+\usepackage{breqn}
+%\usepackage{amsmath}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage[colorlinks = true,
+            linkcolor = blue,
+            urlcolor  = blue,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
+%\usepackage{appendix}
+%\usepackage{spconf}
+\frenchspacing
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\pdfinfo{%
+    /Title (Speaker Identification)
+    /Author (Arnav Arnav, Dheeraj Singh, Pulkit Maloo)
+}
+\setcounter{secnumdepth}{0}
+\nocopyright
+\begin{document}
+% The file aaai.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+\title{Project Proposal: Intrusion Detection through Speaker Identification}
+\author{%
+    %% YAAS QUEEN (burrito)!!!
+    Arnav Arnav\\
+    Indiana University Bloomington \\
+    School of Informatics and Computing \\
+    aarnav@iu.edu \\
+    \And
+    Dheeraj Singh\\
+    Indiana University Bloomington \\
+    School of Informatics and Computing \\
+    dhsingh@iu.edu \\
+    \And
+    Pulkit Maloo\\
+    Indiana University Bloomington \\
+    School of Informatics and Computing \\
+    maloop@iu.edu \\
+}
+\maketitle
+\begin{abstract}
+\begin{quote}
+% such BS, much wow, amaze!!
+% srsly though, need some actual backing for this
+Speaker identification and verification has received a lot of attention in the recent years with the rise in heavy usage of home and personal assistant systems such as HomePod, Amazon Alexa, Google Home, etc. Recognizing individual speakers from voice has benefits by providing personalized assistance to users as well as other applications related to security and privacy such as authentication and intrusion detection. In this project we aim to develop an application using machine learning and deep learning models for Speaker Identification and demonstrate its use cases.
+
+\end{quote}
+\end{abstract}
+
+% better keywords needed
+\textbf{Keywords :} Signal Processing, Speaker Identification, Machine Learning, Deep Learning, Home Assistant Systems
+
+
+\section{Introduction}
+Speaker identification aims to recognize the identity of individual speakers from an input audio. The task of verification aims to check whether an individual is who they claim to be based on the speech of the user. The task can be performed in two ways: text dependent and text independent.  In text dependent cases, the input utterance is always a keyword or key-phrase which has been pre-selected, while text independent speaker identification aims to do the same task for any utterance. \cite{cassidy-speech}
+ 
+%\section{Background and Related Work}
+%Optional here
+
+\section{Dataset}
+%cite the dataset and paper about it
+Most datasets that we have seen have been developed in controlled environments (for eg TIMIT dataset), even though they contain recordings in different sessions. Since many of these datasets were human labeled and cleaned manually they are typically smaller in size. Recently a team at Oxford released their VoxCeleb dataset which contains more than 1M labeled audio clips for around 7000 different celebrities from Youtube. The data is publicly available for research \cite{voxCeleb}.
+
+%The dataset contains various \emph{.wav} files that are a few seconds long and contain voice of a speaker in real life environments. The data contains various clips for each speaker form different Youtube videos, in different environments, with a lot of variations for each speaker.
+
+%For the intrusion detection task, we plan to reduce the 7000 class problem down to a suitable size, say, 6 class problem, where 5 classes are for legitimate users, and the 6th class belongs to anyone who is not authorized (intruder). We did not choose a binary setting as we want to allow room for \emph{special privileges} of each user in our application.
+
+\section{Goals}
+
+For the speaker verification task, we plan to pick a few users, for example, 5 users which will be enrolled and authorized in the system. We plan to build models to identify as well as verify among these legitimate users. For any other users who tries to gain access, we aim to tag them as intruders.
+
+
+We have identified the following goals from easiest to hardest that we want to accomplish by the end of this project. These are tentative goals and are subject to change as we go along with the project.
+
+\begin{itemize}
+	\item Firstly, we plan to benchmark and compare existing models for identification and verification on a few selected users and further try to improve their performance for our task.
+	\item Then, we aim to improve on this model so that we can enroll new legitimate users while minimizing total utterance requirements and enrollment time.
+	\item Finally, we want to develop a reproducible application to demonstrate the use cases of our project in a real world scenario.
+	
+\end{itemize}
+
+\section{Techniques}
+
+The task of speaker identification and verification can be broken down into three sub-tasks: \textit{Feature extraction, speaker enrollment and speaker verification}.
+Feature extraction aims to extract features from the audio inputs that can help in identifying users easily.
+Speaker enrollment aims to learn speaker specific models form the features extracted in the feature extraction phase, and the final verification task compares the closest matching speaker model for an input signal \cite{sv-cnn}.
+
+For the purpose of the project we have identified a few different techniques that we would like to experiment with below:
+\begin{enumerate}
+	\item Speaker identification using traditional feature extraction methods (GMM UBM, RBM, Kalman filtering, MFCC features  and other models) and traditional classification approaches.
+	
+	\item Using deep learning methods  (LSTMs, CNNs, Siamese net,  multi-channel neural networks) for speaker identification and verification.
+	
+	\item Using Bayesian approach to understand the uncertainty in the predictions made by the model, to better understand the mistakes.
+	
+	\item Improving the model for fast enrollment with a few utterances.
+
+\end{enumerate}
+
+%\section{Approach}
+
+%\section{Results}
+
+%\section{Conclusion}
+%\begin{quote}
+    
+%we respecc
+
+%We protecc
+
+%but most importantly 
+
+%we fight bacc
+%\end{quote}
+%\section{Future Work}
+
+\section{Acknowledgements}
+We would like to thank professor Minje Kim for providing us the opportunity to work on such an interesting visualization project. 
+
+We would also like to thank Oxford University for releasing the VoxCeleb dataset for this task.
+
+\bibliography{report.bib}
+\bibliographystyle{aaai}
+
+
+\end{document}
