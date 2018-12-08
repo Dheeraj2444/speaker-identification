@@ -24,8 +24,6 @@ LEARNING_RATE = 5e-4
 N_EPOCHS = 30
 BATCH_SIZE = 32
 
-
-
 assert SIMILAR_PAIRS <= CLIPS_PER_USER * (CLIPS_PER_USER - 1)
 
 
@@ -174,8 +172,7 @@ def save_checkpoint(state, loss):
     print("$$$ Saved a new checkpoint\n")
 
 
-
-def record_old():
+def record():
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 2
@@ -184,10 +181,10 @@ def record_old():
 
     LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
 
-    print("Seak something \n Refrence sentence:", LONG_STRING)
-    print("recording in 3 seconds")
+    # print("Seak something \n Refrence sentence:", LONG_STRING)
 
-    time.sleep(3) 
+    print("Recording starts in 3 seconds")
+    time.sleep(3)
     p = pyaudio.PyAudio()
 
     stream = p.open(format=FORMAT,
@@ -196,19 +193,14 @@ def record_old():
                     input=True,
                     frames_per_buffer=CHUNK)
 
-
-    print("* recording")
-    print("PRESS CTRL-C to stop recording")
+    print("Recording {} seconds".format(RECORD_SECONDS))
     frames = []
 
-    #for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-    #try:
-    #    while True:
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
             data = stream.read(CHUNK)
             frames.append(data)
     #except KeyboardInterrupt:
-    print("* done recording")
+    print("Recording complete")
 
     stream.stop_stream()
     stream.close()
@@ -222,22 +214,17 @@ def record_old():
     wf.close()
 
 
-
 def split_recording(recording=ENROLL_RECORDING_FNAME):
     wav, sr = librosa.load(recording)
-    total_duration = int(librosa.core.get_duration(wav))
-    print(total_duration)
-    print(ENROLL_RECORDING_FNAME)
+    RECORD_SECONDS = int(NUM_NEW_CLIPS * MIN_CLIP_DURATION)
     all_x = []
-    all_sr = []
-    for offset in range(0, total_duration, int(MIN_CLIP_DURATION)):
+    for offset in range(0, RECORD_SECONDS, int(MIN_CLIP_DURATION)):
         x, sr = librosa.load(recording, sr=None, offset=offset,
-                             duration= MIN_CLIP_DURATION)
-        
-        all_x.append(x)
-        all_sr.append(sr)
+                             duration=MIN_CLIP_DURATION)
 
-    return get_stft(all_x[:-1])
+        all_x.append(x)
+
+    return get_stft(all_x)
 
 
 class AudioRec(object):

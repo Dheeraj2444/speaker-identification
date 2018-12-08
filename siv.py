@@ -1,19 +1,7 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
 from utils import *
-from recorder import record_old
 
-def record():
-    #ar = AudioRec()
-    #ar.listen(ENROLL_RECORDING_FNAME)
-    record_old()
-
-def split_recording(recording):
-    """
-    recording is a wav file?
-    returns recording into seconds splits
-    """
-    pass
 
 def fwd_pass(recordings, model_fname):
     """
@@ -47,6 +35,8 @@ def show_current_users():
 
 def enroll_new_user(username):
     record()
+    user_stfts = split_recording()
+    print([st.shape for st in user_stfts])
 
 def verify_user():
     pass
