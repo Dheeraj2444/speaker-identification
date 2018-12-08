@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
-import speech_recognition as sr
 from utils import *
 
 
@@ -13,7 +12,7 @@ def record():
 def split_recording(recording):
     """
     recording is a wav file?
-    returns recording into 3. seconds splits
+    returns recording into seconds splits
     """
     pass
 
@@ -47,8 +46,8 @@ def compare_user_recordings(user1_emb, other_users_emb):
 def show_current_users():
     return []
 
-def enroll_new_user():
-    pass
+def enroll_new_user(username):
+    record()
 
 def verify_user():
     pass

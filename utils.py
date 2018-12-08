@@ -46,6 +46,7 @@ from sklearn.manifold import TSNE
 
 import librosa
 import librosa.display
+import speech_recognition as sr
 import wave
 import contextlib
 import matplotlib.pyplot as plt
