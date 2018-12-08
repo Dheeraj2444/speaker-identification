@@ -3,21 +3,21 @@ import librosa
 import pyaudio
 import time
 import wave
+from utils import *
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
 RECORD_SECONDS = 5
-WAVE_OUTPUT_FILENAME = "output.wav"
-
+ENROLL_RECORDING_FNAME = "output.wav"
 
 LONG_STRING = "He determined to drop his litigation with the monastry, and relinguish his claim"+\
 "s to the wood-cuting and fishery rihgts at once. He was the more"+\
  "ready to do this becuase the rights had becom much less valuable,"+\
  " and he had indeed the vaguest idea where the wood and river in quedtion were."
 
-def record():
+def record_old():
     print("Seak something \n Refrence sentence:", LONG_STRING)
     print("recording in 3 seconds")
 
@@ -55,5 +55,22 @@ def record():
         wf.close()
 
 
+
+def split_recording(recording=ENROLL_RECORDING_FNAME):
+    wav, sr = librosa.load(recording)
+    total_duration = int(librosa.core.get_duration(wav))
+    all_x = []
+    all_sr = []
+    for offset in range(0, total_duration, int(MIN_CLIP_DURATION)):
+        x, sr = librosa.load(recording, sr=None, offset=offset,
+                             duration= MIN_CLIP_DURATION)
+        
+        all_x.append(x)
+        all_sr.append(sr)
+
+    return get_stft(all_x)
+
 if __name__ == "__main__":
-    record()
+    recs = split_recording(ENROLL_RECORDING_FNAME)
+    print(len(stfts))
+    print(stfts[0].shape)
