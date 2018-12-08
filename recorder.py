@@ -1,21 +1,10 @@
 #! /usr/bin/env python3
 import librosa
-import pyaudio
 import time
-import wave
 from utils import *
 
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 2
-RATE = 44100
-RECORD_SECONDS = 5
-ENROLL_RECORDING_FNAME = "output.wav"
 
-LONG_STRING = "He determined to drop his litigation with the monastry, and relinguish his claim"+\
-"s to the wood-cuting and fishery rihgts at once. He was the more"+\
- "ready to do this becuase the rights had becom much less valuable,"+\
- " and he had indeed the vaguest idea where the wood and river in quedtion were."
+LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
 
 def record_old():
     print("Seak something \n Refrence sentence:", LONG_STRING)
