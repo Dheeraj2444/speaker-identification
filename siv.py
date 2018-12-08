@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
 from utils import *
-
+from recorder import record_old
 
 def record():
-    time_to_record = NUM_NEW_CLIPS * MIN_CLIP_DURATION
-    ar = AudioRec()
-    ar.listen(ENROLL_RECORDING_FNAME, time_to_record)
-
+    #ar = AudioRec()
+    #ar.listen(ENROLL_RECORDING_FNAME)
+    record_old()
 
 def split_recording(recording):
     """

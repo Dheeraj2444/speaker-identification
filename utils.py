@@ -24,6 +24,8 @@ LEARNING_RATE = 5e-4
 N_EPOCHS = 30
 BATCH_SIZE = 32
 
+
+
 assert SIMILAR_PAIRS <= CLIPS_PER_USER * (CLIPS_PER_USER - 1)
 
 
@@ -47,6 +49,7 @@ from sklearn.manifold import TSNE
 import librosa
 import librosa.display
 import speech_recognition as sr
+import pyaudio
 import wave
 import contextlib
 import matplotlib.pyplot as plt
@@ -113,7 +116,7 @@ def get_stft(all_x, nperseg=400, noverlap=239, nfft=1023):
         Z = sklearn.preprocessing.normalize(np.abs(Z), axis=1)
         assert Z.shape[0] == 512
         all_stft.append(Z)
-
+        print(Z.shape)
     return np.array(all_stft)
 
 
@@ -171,6 +174,72 @@ def save_checkpoint(state, loss):
     print("$$$ Saved a new checkpoint\n")
 
 
+
+def record_old():
+    CHUNK = 1024
+    FORMAT = pyaudio.paInt16
+    CHANNELS = 2
+    RATE = 44100
+    RECORD_SECONDS = NUM_NEW_CLIPS * MIN_CLIP_DURATION + 2.0
+
+    LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
+
+    print("Seak something \n Refrence sentence:", LONG_STRING)
+    print("recording in 3 seconds")
+
+    time.sleep(3) 
+    p = pyaudio.PyAudio()
+
+    stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK)
+
+
+    print("* recording")
+    print("PRESS CTRL-C to stop recording")
+    frames = []
+
+    #for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+    #try:
+    #    while True:
+    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+            data = stream.read(CHUNK)
+            frames.append(data)
+    #except KeyboardInterrupt:
+    print("* done recording")
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    wf = wave.open(ENROLL_RECORDING_FNAME, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+
+
+def split_recording(recording=ENROLL_RECORDING_FNAME):
+    wav, sr = librosa.load(recording)
+    total_duration = int(librosa.core.get_duration(wav))
+    print(total_duration)
+    print(ENROLL_RECORDING_FNAME)
+    all_x = []
+    all_sr = []
+    for offset in range(0, total_duration, int(MIN_CLIP_DURATION)):
+        x, sr = librosa.load(recording, sr=None, offset=offset,
+                             duration= MIN_CLIP_DURATION)
+        
+        all_x.append(x)
+        all_sr.append(sr)
+
+    return get_stft(all_x[:-1])
+
+
 class AudioRec(object):
     def __init__(self):
         self.r = sr.Recognizer()
@@ -179,9 +248,10 @@ class AudioRec(object):
             print("Calibrating microphone...")
             self.r.adjust_for_ambient_noise(source, duration=2)
 
-    def listen(self, save_path, time_to_record):
+    def listen(self, save_path):
+        time_to_record = NUM_NEW_CLIPS * MIN_CLIP_DURATION + 1.0
         with self.src as source:
-            print("Recording ...")
+            print("Recording ...", time_to_record)
             # record for a maximum of 10s
             audio = self.r.listen(source, phrase_time_limit=time_to_record)
         # write audio to a WAV file
