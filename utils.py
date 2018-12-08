@@ -88,6 +88,33 @@ def wavPlayer(filepath):
     """%(filepath)
     display(HTML(src))
 
+def get_waveform(clip_list, offset=0., duration=MIN_CLIP_DURATION):
+    all_x = []
+    all_sr = []
+    for path in tqdm(clip_list):
+        x, sr = librosa.load(path, sr=None, offset=offset,
+                             duration=duration)
+        all_x.append(x)
+        all_sr.append(sr)
+
+    assert len(np.unique(np.array(all_sr))) == 1
+    return all_x, all_sr
+
+
+def get_stft(all_x, nperseg=400, noverlap=239, nfft=1023):
+
+    all_stft = []
+    for x in tqdm(all_x):
+        _, _, Z = scipy.signal.stft(x, window="hamming",
+                                       nperseg=nperseg,
+                                       noverlap=noverlap,
+                                       nfft=nfft)
+        Z = sklearn.preprocessing.normalize(np.abs(Z), axis=1)
+        assert Z.shape[0] == 512
+        all_stft.append(Z)
+
+    return np.array(all_stft)
+
 
 def load_pretrained_weights():
     weights = {}
@@ -141,7 +168,6 @@ def save_checkpoint(state, loss):
     fname = "checkpoint_" + time.strftime("%Y%m%d-%H%M%S") + "_" + str(loss.item()) + ".pth.tar"
     torch.save(state, get_rel_path(os.path.join(CHECKPOINTS_FOLDER, fname)))  # save checkpoint
     print("$$$ Saved a new checkpoint\n")
-
 
 
 class AudioRec(object):
