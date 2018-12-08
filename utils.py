@@ -7,11 +7,13 @@ STFT_FOLDER = 'stft'
 CHECKPOINTS_FOLDER = "checkpoints"
 PAIRS_FILE = 'pairs.csv'
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
+ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
 
 # Data_Part
 TOTAL_USERS = 100
 CLIPS_PER_USER = 10
 MIN_CLIP_DURATION = 3.
+NUM_NEW_CLIPS = 5
 
 # ML_Part
 TRAINING_USERS = 80
@@ -31,18 +33,23 @@ import sys
 import time
 import itertools
 from collections import Counter
+from collections import OrderedDict
 from IPython.core.display import HTML
+
 import numpy as np
 import pandas as pd
 from scipy.io import loadmat
 import scipy
 import sklearn
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.manifold import TSNE
+
 import librosa
 import librosa.display
 import wave
 import contextlib
 import matplotlib.pyplot as plt
-from collections import OrderedDict
+
 # import seaborn as sns
 
 import torch
@@ -80,13 +87,13 @@ def wavPlayer(filepath):
     </body>
     """%(filepath)
     display(HTML(src))
-    
-    
+
+
 def load_pretrained_weights():
     weights = {}
 
     # loading pretrained vog_vgg learned weights
-    vox_weights = loadmat(get_rel_path(VGG_VOX_WEIGHT_FILE), 
+    vox_weights = loadmat(get_rel_path(VGG_VOX_WEIGHT_FILE),
                           struct_as_record=False, squeeze_me=True)
 
     for l in vox_weights['net'].layers[:-1]:
@@ -95,14 +102,14 @@ def load_pretrained_weights():
     #         print(l.name, [i.shape for i in l.weights])
 
     for i in weights:
-        weights[i][0] = weights[i][0].T 
+        weights[i][0] = weights[i][0].T
 
     weights['conv1'][0] = np.expand_dims(weights['conv1'][0], axis=1)
     weights['fc6'][0] = np.expand_dims(weights['fc6'][0], axis=3)
     weights['fc7'][0] = np.expand_dims(weights['fc7'][0], axis=-1)
     weights['fc7'][0] = np.expand_dims(weights['fc7'][0], axis=-1)
 
-#     print(weights.keys())   
+#     print(weights.keys())
 #     for key in weights:
 #         print(key, [i.shape for i in weights[key]])
     return weights
@@ -134,3 +141,23 @@ def save_checkpoint(state, loss):
     fname = "checkpoint_" + time.strftime("%Y%m%d-%H%M%S") + "_" + str(loss.item()) + ".pth.tar"
     torch.save(state, get_rel_path(os.path.join(CHECKPOINTS_FOLDER, fname)))  # save checkpoint
     print("$$$ Saved a new checkpoint\n")
+
+
+
+class AudioRec(object):
+    def __init__(self):
+        self.r = sr.Recognizer()
+        self.src = sr.Microphone()
+        with self.src as source:
+            print("Calibrating microphone...")
+            self.r.adjust_for_ambient_noise(source, duration=2)
+
+    def listen(self, save_path, time_to_record):
+        with self.src as source:
+            print("Recording ...")
+            # record for a maximum of 10s
+            audio = self.r.listen(source, phrase_time_limit=time_to_record)
+        # write audio to a WAV file
+        with open(save_path, "wb") as f:
+            f.write(audio.get_wav_data())
+

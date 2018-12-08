@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
+import speech_recognition as sr
+from utils import *
 
 
 def record():
-    pass
+    time_to_record = NUM_NEW_CLIPS * MIN_CLIP_DURATION
+    ar = AudioRec()
+    ar.listen(ENROLL_RECORDING_FNAME, time_to_record)
+
 
 def split_recording(recording):
     """
@@ -37,20 +42,18 @@ def compare_user_recordings(user1_emb, other_users_emb):
     compare a user's emb with other users emb
     return a list of distances between user1_emb and other_users_emb
     """
+    pass
 
 def show_current_users():
     return []
 
 def enroll_new_user():
-    print("2")
     pass
 
 def verify_user():
-    print("3")
     pass
 
 def identify_user():
-    print("4")
     pass
 
 
