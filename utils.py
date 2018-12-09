@@ -198,7 +198,8 @@ def record():
 
     print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
     print("Recording starts in 3 seconds\n")
-    print("Speak the following sentence for recording: \n", LONG_STRING)
+    time.sleep(1)
+    print("Speak the following sentence for recording:\n \n", LONG_STRING)
 
     p = pyaudio.PyAudio()
 
@@ -208,7 +209,7 @@ def record():
             input=True,
             frames_per_buffer=CHUNK)
 
-
+    time.sleep(1)
 
     print("speak now!")
     frames = []
