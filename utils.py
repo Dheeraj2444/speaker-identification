@@ -8,7 +8,8 @@ CHECKPOINTS_FOLDER = "checkpoints"
 PAIRS_FILE = 'pairs.csv'
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
 ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
-MODEL_FNAME = ""
+MODEL_FNAME = "checkpoint_20181208-090431_0.007160770706832409.pth.tar"
+SPEAKER_MODELS_FILE = 'speaker_models.pkl'
 
 # Data_Part
 TOTAL_USERS = 100
@@ -20,6 +21,7 @@ NUM_NEW_CLIPS = 2
 TRAINING_USERS = 80
 SIMILAR_PAIRS = 20
 DISSIMILAR_PAIRS = SIMILAR_PAIRS
+DISTANCE_METRIC = "cosine"
 
 LEARNING_RATE = 5e-4
 N_EPOCHS = 30
@@ -32,6 +34,10 @@ from tqdm import tqdm
 import os
 import sys
 import time
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import itertools
 from collections import Counter
 from collections import OrderedDict
@@ -66,6 +72,8 @@ from torch.utils.checkpoint import checkpoint
 
 assert os.path.exists(STFT_FOLDER)
 assert os.path.exists(CHECKPOINTS_FOLDER)
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def get_rel_path(path, server=SERVER, root_dir=ROOT_DIR):
