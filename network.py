@@ -184,7 +184,7 @@ def load_saved_model(fname, test=True):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     new_model_dict = VggVox()
     checkpoint_path = get_rel_path(os.path.join(CHECKPOINTS_FOLDER, fname))
-    checkpoint = torch.load(checkpoint_path)
+    checkpoint = torch.load(checkpoint_path, map_location=device)
 
     new_model_dict.load_state_dict(checkpoint['state_dict'])
     if test:

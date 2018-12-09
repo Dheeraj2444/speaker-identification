@@ -9,17 +9,20 @@ PAIRS_FILE = 'pairs.csv'
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
 ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
 MODEL_FNAME = "checkpoint_20181208-090431_0.007160770706832409.pth.tar"
+SPEAKER_MODELS_FILE = 'speaker_models.pkl'
 
 # Data_Part
 TOTAL_USERS = 100
 CLIPS_PER_USER = 10
 MIN_CLIP_DURATION = 3.
-NUM_NEW_CLIPS = 2
+NUM_NEW_CLIPS = 5
 
 # ML_Part
 TRAINING_USERS = 80
 SIMILAR_PAIRS = 20
 DISSIMILAR_PAIRS = SIMILAR_PAIRS
+DISTANCE_METRIC = "cosine"
+THRESHOLD = 0.8
 
 LEARNING_RATE = 5e-4
 N_EPOCHS = 30
@@ -33,6 +36,10 @@ from tqdm import tqdm
 import os
 import sys
 import time
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import itertools
 from collections import Counter
 from collections import OrderedDict
@@ -72,6 +79,8 @@ assert os.path.exists(STFT_FOLDER)
 assert os.path.exists(CHECKPOINTS_FOLDER)
 
 plt.style.use('seaborn-darkgrid')
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 def get_rel_path(path, server=SERVER, root_dir=ROOT_DIR):
     if server:
@@ -187,7 +196,10 @@ def record():
 
     LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
 
-    # print("Seak something \n Refrence sentence:", LONG_STRING)
+    print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
+    print("Recording starts in 3 seconds\n")
+    print("Speak the following sentence for recording: \n", LONG_STRING)
+
     p = pyaudio.PyAudio()
 
     stream = p.open(format=FORMAT,
@@ -196,9 +208,7 @@ def record():
             input=True,
             frames_per_buffer=CHUNK)
 
-    print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
-    # time.sleep(3)
-    print("Recording starts in 3 seconds", end="... ")
+
 
     print("speak now!")
     frames = []
@@ -206,12 +216,12 @@ def record():
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
             data = stream.read(CHUNK)
             frames.append(data)
-    #except KeyboardInterrupt:
-    print("Recording complete")
 
     stream.stop_stream()
     stream.close()
     p.terminate()
+
+    print("Recording complete")
 
     wf = wave.open(ENROLL_RECORDING_FNAME, 'wb')
     wf.setnchannels(CHANNELS)
@@ -220,13 +230,12 @@ def record():
     wf.writeframes(b''.join(frames))
     wf.close()
 
-
 def split_recording(recording=ENROLL_RECORDING_FNAME):
     wav, sr = librosa.load(recording)
     RECORD_SECONDS = int(NUM_NEW_CLIPS * MIN_CLIP_DURATION)
     all_x = []
     for offset in range(0, RECORD_SECONDS, int(MIN_CLIP_DURATION)):
-        x, sr = librosa.load(recording, sr=None, offset=offset,
+        x, sr = librosa.load(recording, sr=16000, offset=offset,
                              duration=MIN_CLIP_DURATION)
 
         all_x.append(x)
