@@ -8,7 +8,7 @@ CHECKPOINTS_FOLDER = "checkpoints"
 PAIRS_FILE = 'pairs.csv'
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
 ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
-MODEL_FNAME = ""
+MODEL_FNAME = "checkpoint_20181208-090431_0.007160770706832409.pth.tar"
 
 # Data_Part
 TOTAL_USERS = 100
@@ -24,6 +24,7 @@ DISSIMILAR_PAIRS = SIMILAR_PAIRS
 LEARNING_RATE = 5e-4
 N_EPOCHS = 30
 BATCH_SIZE = 32
+THRESHOLD = 0.5
 
 assert SIMILAR_PAIRS <= CLIPS_PER_USER * (CLIPS_PER_USER - 1)
 
@@ -36,6 +37,7 @@ import itertools
 from collections import Counter
 from collections import OrderedDict
 from IPython.core.display import HTML
+import argparse
 
 import numpy as np
 import pandas as pd
@@ -44,6 +46,8 @@ import scipy
 import sklearn
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.manifold import TSNE
+from sklearn import metrics
+from sklearn.metrics import precision_recall_fscore_support as score
 
 import librosa
 import librosa.display
@@ -67,6 +71,7 @@ from torch.utils.checkpoint import checkpoint
 assert os.path.exists(STFT_FOLDER)
 assert os.path.exists(CHECKPOINTS_FOLDER)
 
+plt.style.use('seaborn-darkgrid')
 
 def get_rel_path(path, server=SERVER, root_dir=ROOT_DIR):
     if server:
