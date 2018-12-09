@@ -8,6 +8,7 @@ CHECKPOINTS_FOLDER = "checkpoints"
 PAIRS_FILE = 'pairs.csv'
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
 ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
+MODEL_FNAME = ""
 
 # Data_Part
 TOTAL_USERS = 100
@@ -106,7 +107,7 @@ def get_waveform(clip_list, offset=0., duration=MIN_CLIP_DURATION):
 def get_stft(all_x, nperseg=400, noverlap=239, nfft=1023):
 
     all_stft = []
-    for x in tqdm(all_x):
+    for x in all_x:
         _, _, Z = scipy.signal.stft(x, window="hamming",
                                        nperseg=nperseg,
                                        noverlap=noverlap,
@@ -114,7 +115,6 @@ def get_stft(all_x, nperseg=400, noverlap=239, nfft=1023):
         Z = sklearn.preprocessing.normalize(np.abs(Z), axis=1)
         assert Z.shape[0] == 512
         all_stft.append(Z)
-        print(Z.shape)
     return np.array(all_stft)
 
 
@@ -225,7 +225,6 @@ def split_recording(recording=ENROLL_RECORDING_FNAME):
         all_x.append(x)
 
     return get_stft(all_x)
-
 
 class AudioRec(object):
     def __init__(self):
