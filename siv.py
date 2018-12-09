@@ -11,16 +11,11 @@ def fwd_pass(user_stfts):
     """
     model, *_ = load_saved_model(MODEL_FNAME)
 
-    mean_user_emb = torch.ones(1, 1024)
-    for user_stft in user_stfts:
-        user_stft = torch.tensor(user_stft).to(device)
-        out = model.forward_single(user_stft)
-        print(out.shape)
-        mean_user_emb += out
+    user_stfts = torch.tensor(user_stfts).to(device)
+    out = model.forward_single(user_stfts)
+    out_np = out.detach().cpu().numpy()
 
-    mean_user_emb /= len(user_stfts)
-
-    return mean_user_emb.detach().cpu().numpy()
+    return np.expand_dims(np.mean(out_np, axis=0), axis=0)
 
 
 def store_user_embedding(username, emb):
@@ -61,6 +56,7 @@ def show_current_users():
 def get_emb():
     record()
     user_stfts = split_recording()
+    user_stfts = np.expand_dims(user_stfts, axis=1)
     emb = fwd_pass(user_stfts)
     return emb
 
@@ -72,8 +68,8 @@ def enroll_new_user(username):
 
 def verify_user(username):
     emb = get_emb()
-    user_emb = get_user_embedding(username)
-    dist = scipy.spatial.distance.cdist(emb, user_emb, DISTANCE_METRIC)
+    speaker_models = load_speaker_models()
+    dist = scipy.spatial.distance.cdist(emb, speaker_models[username], DISTANCE_METRIC).item()
     print(dist)
     return dist < THRESHOLD
 
@@ -81,7 +77,7 @@ def verify_user(username):
 def identify_user():
     emb = get_emb()
     speaker_models = load_speaker_models()
-    dist = [(other_user, scipy.spatial.distance.cdist(emb, speaker_model[other_user],
+    dist = [(other_user, scipy.spatial.distance.cdist(emb, speaker_model[other_user].item(),
                               DISTANCE_METRIC)) for other_user in skeaker_models]
     print(dist)
     username, min_dist = min(dist, key=lambda x:x[1])
@@ -99,11 +95,12 @@ def delete_user(username):
 def clear_database():
     with open(SPEAKER_MODELS_FILE, 'wb') as fhand:
         pickle.dump(dict(), fhand)
+    print("Deleted all users in database")
 
 
 def main():
     parser = ArgumentParser(description="Speaker Identification and Verification")
-    parser.add_argument('-s', '--show-current-users', dest="show",
+    parser.add_argument('-l', '--list-current-users', dest="list",
                         default=False, action="store_true",
                         help="Show current enrolled users")
     parser.add_argument('-e', '--enroll', dest="enroll",
@@ -126,8 +123,12 @@ def main():
 
     args = parser.parse_args()
 
-    if args.show:
-        print(show_current_users())
+    if args.list:
+        users_list = show_current_users()
+        if not users_list:
+            print("No users found")
+        else:
+            print("\n".join(users_list))
 
     elif args.enroll:
         username = args.username

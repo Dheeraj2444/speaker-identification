@@ -22,6 +22,7 @@ TRAINING_USERS = 80
 SIMILAR_PAIRS = 20
 DISSIMILAR_PAIRS = SIMILAR_PAIRS
 DISTANCE_METRIC = "cosine"
+THRESHOLD = 0.5
 
 LEARNING_RATE = 5e-4
 N_EPOCHS = 30
@@ -229,7 +230,7 @@ def split_recording(recording=ENROLL_RECORDING_FNAME):
     RECORD_SECONDS = int(NUM_NEW_CLIPS * MIN_CLIP_DURATION)
     all_x = []
     for offset in range(0, RECORD_SECONDS, int(MIN_CLIP_DURATION)):
-        x, sr = librosa.load(recording, sr=None, offset=offset,
+        x, sr = librosa.load(recording, sr=16000, offset=offset,
                              duration=MIN_CLIP_DURATION)
 
         all_x.append(x)
