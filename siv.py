@@ -17,7 +17,6 @@ def fwd_pass(user_stfts):
         print(out.shape)
         mean_user_emb += out
 
-
     mean_user_emb /= len(user_stfts)
 
     return mean_user_emb
@@ -81,6 +80,9 @@ def main():
     parser.add_argument('-i', '--identify', dest="identify",
                         default=False, action="store_true",
                         help="Identify a user")
+    parser.add_argument('-c', '--clear', dest="clear",
+                        default=False, action="store_true",
+                        help="Clear Database")
     parser.add_argument('-u', '--username', type=str, default=None,
                         help="Name of the user to enroll or verify")
 
@@ -100,7 +102,6 @@ def main():
         assert username is not None, "Enter username"
         assert username in show_current_users(), "Unrecognized username"
         verify_user(username)
-
 
     elif args.identify:
         identify_user()
