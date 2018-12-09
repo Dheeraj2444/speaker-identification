@@ -14,7 +14,7 @@ MODEL_FNAME = ""
 TOTAL_USERS = 100
 CLIPS_PER_USER = 10
 MIN_CLIP_DURATION = 3.
-NUM_NEW_CLIPS = 5
+NUM_NEW_CLIPS = 2
 
 # ML_Part
 TRAINING_USERS = 80
@@ -177,23 +177,25 @@ def record():
     FORMAT = pyaudio.paInt16
     CHANNELS = 2
     RATE = 44100
-    RECORD_SECONDS = NUM_NEW_CLIPS * MIN_CLIP_DURATION + 2.0
+    EXTRA_SECONDS = 2.0
+    RECORD_SECONDS = NUM_NEW_CLIPS * MIN_CLIP_DURATION + EXTRA_SECONDS
 
     LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
 
     # print("Seak something \n Refrence sentence:", LONG_STRING)
-
-    print("Recording starts in 3 seconds")
-    time.sleep(3)
     p = pyaudio.PyAudio()
 
     stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    frames_per_buffer=CHUNK)
+            channels=CHANNELS,
+            rate=RATE,
+            input=True,
+            frames_per_buffer=CHUNK)
 
-    print("Recording {} seconds".format(RECORD_SECONDS))
+    print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
+    # time.sleep(3)
+    print("Recording starts in 3 seconds", end="... ")
+
+    print("speak now!")
     frames = []
 
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
