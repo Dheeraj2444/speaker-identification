@@ -69,20 +69,20 @@ def enroll_new_user(username):
 def verify_user(username):
     emb = get_emb()
     speaker_models = load_speaker_models()
-    dist = scipy.spatial.distance.cdist(emb, speaker_models[username], DISTANCE_METRIC).item()
+    dist = 1 - scipy.spatial.distance.cdist(emb, speaker_models[username], DISTANCE_METRIC).item()
     print(dist)
-    return dist < THRESHOLD
+    return dist > THRESHOLD
 
 
 def identify_user():
     emb = get_emb()
     speaker_models = load_speaker_models()
-    dist = [(other_user, scipy.spatial.distance.cdist(emb, speaker_model[other_user].item(),
-                              DISTANCE_METRIC)) for other_user in skeaker_models]
+    dist = [(other_user, 1 - scipy.spatial.distance.cdist(emb, speaker_models[other_user],
+                                                      DISTANCE_METRIC).item()) for other_user in speaker_models]
     print(dist)
     username, min_dist = min(dist, key=lambda x:x[1])
 
-    if min_dist < THRESHOLD:
+    if min_dist > THRESHOLD:
         return username
     return None
 

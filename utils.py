@@ -15,14 +15,14 @@ SPEAKER_MODELS_FILE = 'speaker_models.pkl'
 TOTAL_USERS = 100
 CLIPS_PER_USER = 10
 MIN_CLIP_DURATION = 3.
-NUM_NEW_CLIPS = 2
+NUM_NEW_CLIPS = 5
 
 # ML_Part
 TRAINING_USERS = 80
 SIMILAR_PAIRS = 20
 DISSIMILAR_PAIRS = SIMILAR_PAIRS
 DISTANCE_METRIC = "cosine"
-THRESHOLD = 0.5
+THRESHOLD = 0.8
 
 LEARNING_RATE = 5e-4
 N_EPOCHS = 30
@@ -191,7 +191,10 @@ def record():
 
     LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
 
-    # print("Seak something \n Refrence sentence:", LONG_STRING)
+    print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
+    print("Recording starts in 3 seconds\n")
+    print("Speak the following sentence for recording: \n", LONG_STRING)
+    
     p = pyaudio.PyAudio()
 
     stream = p.open(format=FORMAT,
@@ -200,9 +203,7 @@ def record():
             input=True,
             frames_per_buffer=CHUNK)
 
-    print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
-    # time.sleep(3)
-    print("Recording starts in 3 seconds", end="... ")
+    
 
     print("speak now!")
     frames = []
@@ -210,12 +211,12 @@ def record():
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
             data = stream.read(CHUNK)
             frames.append(data)
-    #except KeyboardInterrupt:
-    print("Recording complete")
 
     stream.stop_stream()
     stream.close()
     p.terminate()
+    
+    print("Recording complete")
 
     wf = wave.open(ENROLL_RECORDING_FNAME, 'wb')
     wf.setnchannels(CHANNELS)
@@ -223,7 +224,6 @@ def record():
     wf.setframerate(RATE)
     wf.writeframes(b''.join(frames))
     wf.close()
-
 
 def split_recording(recording=ENROLL_RECORDING_FNAME):
     wav, sr = librosa.load(recording)
