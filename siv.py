@@ -53,32 +53,39 @@ def show_current_users():
     return list(speaker_models.keys())
 
 
-def get_emb():
-    record()
-    user_stfts = split_recording()
+def get_emb(fpath):
+    record(fpath)
+    user_stfts = split_recording(fpath)
     user_stfts = np.expand_dims(user_stfts, axis=1)
     emb = fwd_pass(user_stfts)
     return emb
 
 
+def emb_dist(emb1, emb2):
+    return 1 - scipy.spatial.distance.cdist(emb1, emb2, DISTANCE_METRIC).item()
+
+
 def enroll_new_user(username):
-    emb = get_emb()
+    fpath = os.path.join(ENROLLMENT_FOLDER, username + '_' + ENROLL_RECORDING_FNAME)
+    emb = get_emb(fpath)
     store_user_embedding(username, emb)
 
 
 def verify_user(username):
-    emb = get_emb()
+    fpath = username + '_' + VERIFY_RECORDING_FNAME
+    mb = get_emb(fpath)
     speaker_models = load_speaker_models()
-    dist = 1 - scipy.spatial.distance.cdist(emb, speaker_models[username], DISTANCE_METRIC).item()
+    dist = emb_dist(emb, speaker_models[username])
     print(dist)
     return dist > THRESHOLD
 
 
 def identify_user():
-    emb = get_emb()
+    fpath = username + '_' + IDENTIFY_RECORDING_FNAME
+    emb = get_emb(fpath)
     speaker_models = load_speaker_models()
-    dist = [(other_user, 1 - scipy.spatial.distance.cdist(emb, speaker_models[other_user],
-                                                      DISTANCE_METRIC).item()) for other_user in speaker_models]
+    dist = [(other_user, emb_dist(emb, speaker_model[other_user]))
+            for other_user in speaker_models]
     print(dist)
     username, min_dist = min(dist, key=lambda x:x[1])
 
@@ -90,7 +97,10 @@ def identify_user():
 def delete_user(username):
     speaker_models = load_speaker_models()
     _ = speaker_models.pop(username)
-    print("Successfully removed {} from databse".format(username))
+    print("Successfully removed {} from database".format(username))
+    with open(SPEAKER_MODELS_FILE, 'wb') as fhand:
+        pickle.dump(speaker_models, fhand)
+
 
 def clear_database():
     with open(SPEAKER_MODELS_FILE, 'wb') as fhand:
@@ -164,3 +174,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
