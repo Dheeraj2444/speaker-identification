@@ -169,7 +169,11 @@ def main():
         clear_database()
 
     else:
-        show_current_users()
+        users_list = show_current_users()
+        if not users_list:
+            print("No users found")
+        else:
+            print("\n".join(users_list))
 
 
 if __name__ == "__main__":
