@@ -6,8 +6,11 @@ TRAIN_PATH = 'wav_train_subset'
 CHECKPOINTS_FOLDER = "checkpoints"
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
 ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
+VERIFY_RECORDING_FNAME = "verify_user_recording.wav"
+IDENTIFY_RECORDING_FNAME = "identify_user_recording.wav"
 MODEL_FNAME = "checkpoint_20181208-090431_0.007160770706832409.pth.tar"
 SPEAKER_MODELS_FILE = 'speaker_models.pkl'
+ENROLLMENT_FOLDER = "enrolled_users"
 
 # Data_Part
 TOTAL_USERS = 100
@@ -191,7 +194,7 @@ def save_checkpoint(state, loss):
     print("$$$ Saved a new checkpoint\n")
 
 
-def record():
+def record(fpath):
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 2
@@ -202,26 +205,23 @@ def record():
     LONG_STRING = "She had your dark suit in greasy wash water all year. Don't ask me to carry an oily rag like that!"
 
     print("Recording {} seconds".format(RECORD_SECONDS - EXTRA_SECONDS))
-    print("Recording starts in 3 seconds\n")
-    time.sleep(1)
-    print("Speak the following sentence for recording:\n \n", LONG_STRING)
+    print("\n Speak the following sentence for recording: \n {} \n".format(LONG_STRING))
 
     p = pyaudio.PyAudio()
 
-    stream = p.open(format=FORMAT,
-            channels=CHANNELS,
-            rate=RATE,
-            input=True,
-            frames_per_buffer=CHUNK)
+    stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE,
+                    input=True, frames_per_buffer=CHUNK)
 
     time.sleep(1)
 
-    print("speak now!")
+    print("Recording starts in 3 seconds...")
+    time.sleep(2)   # start 1 second earlier
+    print("Speak now!")
     frames = []
 
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-            data = stream.read(CHUNK)
-            frames.append(data)
+        data = stream.read(CHUNK)
+        frames.append(data)
 
     stream.stop_stream()
     stream.close()
@@ -229,12 +229,12 @@ def record():
 
     print("Recording complete")
 
-    wf = wave.open(ENROLL_RECORDING_FNAME, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(b''.join(frames))
-    wf.close()
+    with wave.open(fpath, 'wb') as wf:
+        wf.setnchannels(CHANNELS)
+        wf.setsampwidth(p.get_sample_size(FORMAT))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(frames))
+
 
 
 def split_recording(recording=ENROLL_RECORDING_FNAME):
