@@ -133,14 +133,11 @@ class ContrastiveLoss(torch.nn.Module):
 
 
 class VoxCelebDataset(Dataset):
-    def __init__(self, pairs_fname=PAIRS_FILE, n_users=TRAINING_USERS, clips_per_user=CLIPS_PER_USER):
+    def __init__(self, pairs_fname=PAIRS_FILE, n_users=TRAINING_USERS, clips_per_user=CLIPS_PER_USER, train=True):
         pairs_file = pd.read_csv(get_rel_path(pairs_fname))
         self.all_user_ids = sorted(pairs_file.user1.unique())
         self.training_users = self.all_user_ids[: n_users]
-
-        user1_subset = pairs_file[pairs_file.user1.isin(self.training_users)]
-        user2_subset = user1_subset[user1_subset.user2.isin(self.training_users)]
-
+        
         def balance_data(df):
             pairs_df = []
             for user in df.user1.unique():
@@ -151,11 +148,22 @@ class VoxCelebDataset(Dataset):
 
             pairs_df = pd.concat(pairs_df)
             return pairs_df
+        
+        if train:
+            user1_subset = pairs_file[pairs_file.user1.isin(self.training_users)]
+            user2_subset = user1_subset[user1_subset.user2.isin(self.training_users)]
+        else:
+            user1_subset = pairs_file[~pairs_file.user1.isin(self.training_users)]
+            user2_subset = user1_subset[~user1_subset.user2.isin(self.training_users)]            
 
         pairs_df = balance_data(user2_subset)
-
-        assert len(pairs_df[pairs_df.user1.isin(self.training_users)]) == len(pairs_df)
-        assert len(pairs_df[pairs_df.user2.isin(self.training_users)]) == len(pairs_df)
+        
+        if train:
+            assert len(pairs_df[pairs_df.user1.isin(self.training_users)]) == len(pairs_df)
+            assert len(pairs_df[pairs_df.user2.isin(self.training_users)]) == len(pairs_df)
+        else:
+            assert len(pairs_df[~pairs_df.user1.isin(self.training_users)]) == len(pairs_df)
+            assert len(pairs_df[~pairs_df.user2.isin(self.training_users)]) == len(pairs_df)
 
         self.spec = pairs_df[['path1', 'path2', 'label']].values
 
@@ -189,6 +197,7 @@ def load_saved_model(fname, test=True):
     new_model_dict.load_state_dict(checkpoint['state_dict'])
     if test:
         model = new_model_dict.eval()
+    print("Loading model in test mode", test)
     model = model.to(device)
 
     new_optimizer = optim.Adam(params=model.parameters())

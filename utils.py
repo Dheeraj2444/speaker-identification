@@ -3,9 +3,7 @@ SERVER = False
 # Files and Directories
 ROOT_DIR = ""
 TRAIN_PATH = 'wav_train_subset'
-STFT_FOLDER = 'stft'
 CHECKPOINTS_FOLDER = "checkpoints"
-PAIRS_FILE = 'pairs.csv'
 VGG_VOX_WEIGHT_FILE = "vggvox_ident_net.mat"
 ENROLL_RECORDING_FNAME = "enroll_user_recording.wav"
 MODEL_FNAME = "checkpoint_20181208-090431_0.007160770706832409.pth.tar"
@@ -13,21 +11,23 @@ SPEAKER_MODELS_FILE = 'speaker_models.pkl'
 
 # Data_Part
 TOTAL_USERS = 100
-CLIPS_PER_USER = 10
-MIN_CLIP_DURATION = 3.
+CLIPS_PER_USER = 15
+MIN_CLIP_DURATION = 5.
 NUM_NEW_CLIPS = 5
 
 # ML_Part
-TRAINING_USERS = 80
+TRAINING_USERS = 100
 SIMILAR_PAIRS = 20
-DISSIMILAR_PAIRS = SIMILAR_PAIRS
+DISSIMILAR_PAIRS = SIMILAR_PAIRS * 5
 DISTANCE_METRIC = "cosine"
 THRESHOLD = 0.8
 
 LEARNING_RATE = 5e-4
 N_EPOCHS = 30
 BATCH_SIZE = 32
-THRESHOLD = 0.5
+
+STFT_FOLDER = 'stft' + str(int(MIN_CLIP_DURATION))
+PAIRS_FILE = 'pairs{}.csv'.format(int(MIN_CLIP_DURATION))
 
 assert SIMILAR_PAIRS <= CLIPS_PER_USER * (CLIPS_PER_USER - 1)
 
@@ -50,7 +50,7 @@ import numpy as np
 import pandas as pd
 from scipy.io import loadmat
 import scipy
-import sklearn
+#import sklearn
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.manifold import TSNE
 from sklearn import metrics
@@ -75,8 +75,12 @@ from torch.utils.data import Dataset, DataLoader
 from torch.autograd import Variable
 from torch.utils.checkpoint import checkpoint
 
-assert os.path.exists(STFT_FOLDER)
-assert os.path.exists(CHECKPOINTS_FOLDER)
+if not os.path.exists(STFT_FOLDER):
+    os.mkdir(STFT_FOLDER)
+
+if not os.path.exists(STFT_FOLDER):
+    os.mkdir(CHECKPOINTS_FOLDER)
+
 
 plt.style.use('seaborn-darkgrid')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -104,6 +108,7 @@ def wavPlayer(filepath):
     </body>
     """%(filepath)
     display(HTML(src))
+
 
 def get_waveform(clip_list, offset=0., duration=MIN_CLIP_DURATION):
     all_x = []
@@ -231,6 +236,7 @@ def record():
     wf.writeframes(b''.join(frames))
     wf.close()
 
+
 def split_recording(recording=ENROLL_RECORDING_FNAME):
     wav, sr = librosa.load(recording)
     RECORD_SECONDS = int(NUM_NEW_CLIPS * MIN_CLIP_DURATION)
@@ -242,6 +248,7 @@ def split_recording(recording=ENROLL_RECORDING_FNAME):
         all_x.append(x)
 
     return get_stft(all_x)
+
 
 class AudioRec(object):
     def __init__(self):
