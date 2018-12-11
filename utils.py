@@ -53,7 +53,7 @@ import numpy as np
 import pandas as pd
 from scipy.io import loadmat
 import scipy
-#import sklearn
+import sklearn
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.manifold import TSNE
 from sklearn import metrics
@@ -81,8 +81,11 @@ from torch.utils.checkpoint import checkpoint
 if not os.path.exists(STFT_FOLDER):
     os.mkdir(STFT_FOLDER)
 
-if not os.path.exists(STFT_FOLDER):
+if not os.path.exists(CHECKPOINTS_FOLDER):
     os.mkdir(CHECKPOINTS_FOLDER)
+
+if not os.path.exists(ENROLLMENT_FOLDER):
+    os.mkdir(ENROLLMENT_FOLDER)
 
 
 plt.style.use('seaborn-darkgrid')
@@ -229,11 +232,12 @@ def record(fpath):
 
     print("Recording complete")
 
-    with wave.open(fpath, 'wb') as wf:
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(p.get_sample_size(FORMAT))
-        wf.setframerate(RATE)
-        wf.writeframes(b''.join(frames))
+    wf = wave.open(fpath, 'wb') 
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
 
 
 
